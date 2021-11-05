@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Es het mer abghänkt Button</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="style-sheet.css">
+    <!-- uncomment for ide typing support
+    <script src="https://cdn.socket.io/4.3.1/socket.io.js"></script>
+    -->
+</head>
+<body>
+<div id="content">
+    <h1>De "Es het mer abghänkt" Button</h1>
+    <label for="din-name">Din Name: </label>
+    <input type="text" id="din-name">
+    <div class="donation-meter">
+        <span class="glass">
+            <strong id="button-presses-description" class="total" style="bottom: 0%"></strong>
+            <span class="amount" id="button-presses-amount" style="height: 0%"></span>
+        </span>
+        <div class="bulb">
+            <span class="red-circle"></span>
+            <span class="filler">
+                <span></span>
+            </span>
+        </div>
+    </div>
+    <div>
+        <h3>Denne do hets scho abglöscht:</h3>
+        <ul id="user-list">
+
+        </ul>
+    </div>
+    <a id="button" class="button"></a>
+</div>
+</body>
+<script>
+    var socket = io();
+    let nameInput = document.getElementById("din-name");
+    document.getElementById("button").addEventListener('click', (ev) => {
+        let name = nameInput.value;
+        if (name) {
+            console.log('Schicke dases dir abghänkt het')
+            socket.emit('hets-abghaenkt', {user: name})
+        } else {
+            alert('Gib en name ah du latschi ;)')
+            console.error('Gib en name ah du latschi ;)')
+        }
+    })
+
+    let userList = document.getElementById("user-list");
+    let buttonPressesDescription = document.getElementById("button-presses-description");
+    let buttonPressesAmount = document.getElementById("button-presses-amount");
+    socket.on('liste-mit-allne-wos-abghaenkt-het', (message) => {
+        let amountButtonPressesNumber = message['amountButtonPresses'];
+        const maxAmountButtonPresses = 100;
+        let amountInPercent = 100 / maxAmountButtonPresses * amountButtonPressesNumber;
+        if(amountInPercent > 100){
+            amountInPercent = 100;
+        }
+        buttonPressesDescription.textContent = `${amountButtonPressesNumber} Chnopfdrück`;
+        buttonPressesDescription.style.bottom = `${amountInPercent}%`;
+        buttonPressesAmount.style.height = `${amountInPercent}%`;
+        userList.innerHTML = '';
+        for (let username of message['users']) {
+            let listElement = document.createElement("li");
+            listElement.append(document.createTextNode(username));
+            userList.append(listElement);
+        }
+    });
+</script>
+</html>
